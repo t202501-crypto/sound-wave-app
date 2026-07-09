@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>소리의 3요소 - 파형 비교기 | 잠신중 과학 실험실</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --purple: #7C6BC7;
+    --purple-dark: #5F4FA5;
+    --purple-soft: #F0EDF9;
+    --purple-line: #DED6F0;
+    --mint: #5DBCA0;
+    --mint-dark: #3EA080;
+    --mint-soft: #EAFAF4;
+    --mint-line: #CDEFE2;
+    --pink: #EE7A9C;
+    --pink-dark: #D5527A;
+    --pink-soft: #FDEBF1;
+    --orange: #F0A54A;
+    --orange-dark: #D28530;
+    --orange-soft: #FDF5E7;
+    --blue: #4F9CD8;
+    --blue-soft: #EAF3FB;
+    --coral: #F27A5A;
+    --coral-soft: #FDECE5;
+    --gray: #A8A6B8;
+    --gray-soft: #F0EEF3;
+    --ink: #2D3436;
+    --sub: #6E7275;
+    --paper: #F7F5FB;
+    --line: #E5E1E8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.5;
+    padding: 20px 16px 60px;
+    min-height: 100vh;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 24px; }
+  .eyebrow {
+    display: inline-block;
+    font-family: 'Jua', sans-serif;
+    font-size: 18px;
+    color: var(--mint-dark);
+    background: var(--mint-soft);
+    border: 1px solid var(--mint-line);
+    padding: 6px 20px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-family: 'Jua', sans-serif;
+    font-size: 34px;
+    color: var(--purple-dark);
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .subtitle { color: var(--sub); font-size: 14px; }
+
+  .panel {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(93,73,163,0.05);
+  }
+  .panel-label {
+    font-family: 'Jua', sans-serif;
+    font-size: 17px;
+    color: var(--purple-dark);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .panel-label::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--purple);
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  canvas.live {
+    width: 100%;
+    height: 220px;
+    background: #FDFCFF;
+    border: 1px solid var(--purple-line);
+    border-radius: 12px;
+    display: block;
+  }
+
+  .meters-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .meter-card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 2px 6px rgba(93,73,163,0.04);
+  }
+  .meter-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 15px;
+    color: var(--sub);
+    margin-bottom: 6px;
+  }
+  .meter-value {
+    font-family: 'Jua', sans-serif;
+    font-size: 32px;
+    color: var(--purple-dark);
+    line-height: 1;
+  }
+  .meter-value .unit { font-size: 16px; color: var(--sub); margin-left: 4px; }
+  .progress-bar {
+    width: 100%;
+    height: 10px;
+    background: var(--purple-soft);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--pink), var(--orange));
+    border-radius: 999px;
+    transition: width 0.1s;
+    width: 0%;
+  }
+
+  .btn {
+    font-family: 'Jua', sans-serif;
+    font-size: 15px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: transform 0.08s, box-shadow 0.15s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .btn:active { transform: scale(0.96); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-mic { background: var(--purple); color: white; }
+  .btn-mic.active { background: var(--purple-dark); }
+  .btn-pink { background: var(--pink); color: white; }
+  .btn-orange { background: var(--orange); color: white; }
+  .btn-gray { background: var(--gray-soft); color: var(--ink); border: 1.5px solid var(--line); box-shadow:none; }
+  .btn-shot { background: var(--purple-dark); color: white; }
+
+  .mic-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  /* Generator panel */
+  .gen-panel { border-color: var(--purple-line); background: linear-gradient(180deg, var(--purple-soft) 0%, white 100%); }
+  .gen-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .gen-btn {
+    font-family: 'Jua', sans-serif;
+    font-size: 15px;
+    padding: 14px 8px;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    cursor: pointer;
+    text-align: center;
+    background: white;
+    transition: transform 0.08s, box-shadow 0.15s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+  .gen-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .gen-btn:active { transform: scale(0.96); }
+  .gen-btn .hz {
+    display: block;
+    font-size: 12px;
+    color: var(--sub);
+    margin-top: 3px;
+    font-weight: normal;
+  }
+  .gen-btn[data-freq="200"] { color: var(--blue); border-color: var(--blue); background: var(--blue-soft); }
+  .gen-btn[data-freq="400"] { color: var(--mint-dark); border-color: var(--mint); background: var(--mint-soft); }
+  .gen-btn[data-freq="800"] { color: var(--coral); border-color: var(--coral); background: var(--coral-soft); }
+  .gen-btn.stop { color: var(--sub); border-color: var(--line); }
+  .gen-btn.active {
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  }
+  .gen-btn[data-freq="200"].active { background: var(--blue); }
+  .gen-btn[data-freq="400"].active { background: var(--mint); }
+  .gen-btn[data-freq="800"].active { background: var(--coral); }
+  .gen-hint {
+    font-size: 12px;
+    color: var(--sub);
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .capture-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  /* A/B comparison */
+  .ab-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .slot {
+    background: #FCFBFE;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .slot h3 {
+    font-family: 'Jua', sans-serif;
+    font-size: 17px;
+    margin-bottom: 8px;
+    color: var(--purple-dark);
+  }
+  .slot .info {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--sub);
+  }
+  .slot .info b { color: var(--ink); }
+  canvas.slot-canvas {
+    width: 100%;
+    height: 130px;
+    background: white;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .quiz {
+    background: linear-gradient(135deg, var(--orange-soft) 0%, #FFFAF0 100%);
+    border: 2px dashed var(--orange);
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    margin-top: 16px;
+  }
+  .quiz-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 17px;
+    color: var(--orange-dark);
+    margin-bottom: 4px;
+  }
+  .quiz-q { font-size: 15px; color: var(--ink); }
+
+  .screenshot-controls {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  /* Flash effect for capture */
+  @keyframes flash {
+    0% { background: white; }
+    50% { background: rgba(255,255,150,0.4); }
+    100% { background: white; }
+  }
+  .flashing { animation: flash 0.5s; }
+
+  @media (max-width: 600px) {
+    body { padding: 14px 10px 40px; }
+    .meters-row { grid-template-columns: 1fr; }
+    .ab-compare { grid-template-columns: 1fr; }
+    .gen-buttons { grid-template-columns: 1fr 1fr; }
+    h1 { font-size: 26px; }
+    .meter-value { font-size: 26px; }
+    .panel { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="container" id="captureRoot">
+
+<header>
+  <div class="eyebrow">🔬 즐거운 잠신중 과학 실험실</div>
+  <h1>소리의 3요소 - 파형 비교기</h1>
+  <p class="subtitle">마이크로 들어오는 소리를 실시간 파형으로 보여주고, 진동수와 진폭을 비교합니다</p>
+</header>
+
+<!-- Live waveform panel -->
+<div class="panel">
+  <div class="panel-label">실시간 파형</div>
+  <canvas class="live" id="liveCanvas"></canvas>
+</div>
+
+<!-- Meters -->
+<div class="meters-row">
+  <div class="meter-card">
+    <div class="meter-title">🎵 진동수 (음의 높낮이)</div>
+    <div class="meter-value"><span id="freqVal">-</span><span class="unit">Hz</span></div>
+  </div>
+  <div class="meter-card">
+    <div class="meter-title">🔊 진폭 (음의 세기, 상대값)</div>
+    <div class="meter-value"><span id="ampVal">-</span><span class="unit">%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="ampBar"></div></div>
+  </div>
+</div>
+
+<!-- Mic control -->
+<div class="mic-row">
+  <button class="btn btn-mic" id="micBtn">🎤 마이크 시작</button>
+</div>
+
+<!-- Tone generator panel (NEW) -->
+<div class="panel gen-panel">
+  <div class="panel-label">🎼 소리 생성기 (진폭 고정, 진동수만 다름)</div>
+  <div class="gen-buttons">
+    <button class="gen-btn" data-freq="200">낮은 파<span class="hz">200 Hz</span></button>
+    <button class="gen-btn" data-freq="400">중간 파<span class="hz">400 Hz</span></button>
+    <button class="gen-btn" data-freq="800">높은 파<span class="hz">800 Hz</span></button>
+    <button class="gen-btn stop" id="genStop">⏹ 소리 멈춤</button>
+  </div>
+  <div class="gen-hint">스피커·마이크 왜곡 없이 앱 내부에서 정확한 신호를 만듭니다 (교실 잡음 영향 없음)</div>
+</div>
+
+<!-- Capture controls -->
+<div class="capture-controls">
+  <button class="btn btn-pink" id="capA">📸 지금 소리를 A로 저장</button>
+  <button class="btn btn-orange" id="capB">📸 지금 소리를 B로 저장</button>
+  <button class="btn btn-gray" id="resetBtn">🗑 초기화</button>
+</div>
+
+<!-- A/B comparison -->
+<div class="panel">
+  <div class="panel-label">🔍 A와 B의 파형 비교</div>
+  <div class="ab-compare">
+    <div class="slot">
+      <h3>A 파형</h3>
+      <canvas class="slot-canvas" id="canvasA"></canvas>
+      <div class="info"><span>진동수: <b id="freqA">-</b></span> <span>진폭: <b id="ampA">-</b></span></div>
+    </div>
+    <div class="slot">
+      <h3>B 파형</h3>
+      <canvas class="slot-canvas" id="canvasB"></canvas>
+      <div class="info"><span>진동수: <b id="freqB">-</b></span> <span>진폭: <b id="ampB">-</b></span></div>
+    </div>
+  </div>
+  <div class="quiz">
+    <div class="quiz-title">🤔 관찰하고 생각해봐요</div>
+    <div class="quiz-q">A와 B는 어떤 차이가 있나요?</div>
+  </div>
+</div>
+
+<!-- Screenshot button (NEW) -->
+<div class="screenshot-controls">
+  <button class="btn btn-shot" id="screenshotBtn">📷 화면 전체 캡처하기</button>
+</div>
+
+</div>
+
+<script>
+"use strict";
+
+// ============================================================
+// State
+// ============================================================
+let audioCtx = null;
+let mode = 'idle';           // 'idle' | 'mic' | 'gen'
+let analyser = null;
+let mediaStream = null;
+let micSource = null;
+let osc = null;
+let oscGain = null;
+let liveFreq = 0, liveAmp = 0;
+let currentGenFreq = 0;
+
+const GEN_AMP_PERCENT = 60;   // fixed amplitude for all generator tones
+const GEN_GAIN = 0.15;         // actual speaker gain (safe volume)
+
+// ============================================================
+// Canvas utilities
+// ============================================================
+function fitCanvas(c) {
+  const dpr = window.devicePixelRatio || 1;
+  const w = c.clientWidth, h = c.clientHeight;
+  c.width = w * dpr; c.height = h * dpr;
+  const ctx = c.getContext('2d');
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(dpr, dpr);
+  return { ctx, w, h };
+}
+
+function drawGrid(ctx, w, h) {
+  ctx.strokeStyle = '#F0EDF5';
+  ctx.lineWidth = 1;
+  for (let i = 1; i < 8; i++) {
+    const x = w * i / 8;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+  }
+  for (let j = 1; j < 4; j++) {
+    const y = h * j / 4;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+  }
+  ctx.strokeStyle = '#DED6F0';
+  ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
+}
+
+// Draw a synthetic sine wave using freq (Hz) and amp (%)
+function drawSineWave(ctx, w, h, freq, ampPercent, color, lineWidth) {
+  // 12ms window: 200Hz→2.4 cycles, 400Hz→4.8, 800Hz→9.6
+  const cycles = Math.max(1, freq * 0.012);
+  const points = 600;
+  const amp = Math.max(0, Math.min(100, ampPercent)) / 100 * (h/2 - 14);
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (let i = 0; i < points; i++) {
+    const t = (i / (points - 1)) * cycles;
+    const x = i / (points - 1) * w;
+    const y = h/2 - amp * Math.sin(2 * Math.PI * t);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+// ============================================================
+// Pitch detection (autocorrelation)
+// ============================================================
+function detectPitch(buf, sampleRate) {
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / SIZE);
+  if (rms < 0.006) return -1;
+
+  const thresh = 0.15;
+  let r1 = 0, r2 = SIZE - 1;
+  for (let i = 0; i < SIZE/2; i++) if (Math.abs(buf[i]) < thresh) { r1 = i; break; }
+  for (let i = 1; i < SIZE/2; i++) if (Math.abs(buf[SIZE-i]) < thresh) { r2 = SIZE - i; break; }
+  const trimmed = buf.subarray(r1, r2);
+  const N = trimmed.length;
+  if (N < 32) return -1;
+
+  const c = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    let s = 0;
+    for (let j = 0; j < N - i; j++) s += trimmed[j] * trimmed[j + i];
+    c[i] = s;
+  }
+  let d = 0; while (d < N - 1 && c[d] > c[d + 1]) d++;
+  let maxval = -Infinity, maxpos = -1;
+  for (let i = d; i < N; i++) if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
+  if (maxpos <= 0) return -1;
+  const x1 = c[maxpos-1] || 0, x2 = c[maxpos], x3 = c[maxpos+1] || 0;
+  const a = (x1 + x3 - 2*x2) / 2, b = (x3 - x1) / 2;
+  let T0 = maxpos;
+  if (a) T0 = maxpos - b/(2*a);
+  return sampleRate / T0;
+}
+
+// ============================================================
+// Draw loops
+// ============================================================
+function drawLive() {
+  if (mode === 'idle') return;
+  requestAnimationFrame(drawLive);
+
+  const { ctx, w, h } = fitCanvas(document.getElementById('liveCanvas'));
+  ctx.clearRect(0, 0, w, h);
+  drawGrid(ctx, w, h);
+
+  if (mode === 'mic') {
+    // Read from analyser
+    const buf = new Float32Array(analyser.fftSize);
+    analyser.getFloatTimeDomainData(buf);
+    let sum = 0;
+    for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+    const rms = Math.sqrt(sum / buf.length);
+    liveAmp = Math.min(100, Math.sqrt(rms) * 230);
+    const f = detectPitch(buf, audioCtx.sampleRate);
+    if (f > 60 && f < 2000) liveFreq = f;
+    if (rms < 0.006) { liveFreq = 0; liveAmp = 0; }
+  }
+  // In gen mode: liveFreq and liveAmp are set by startGen()
+
+  // Draw waveform
+  if (liveFreq > 0 && liveAmp > 0) {
+    const color = (mode === 'gen') ? getGenColor(currentGenFreq) : '#7C6BC7';
+    drawSineWave(ctx, w, h, liveFreq, liveAmp, color, 3);
+    document.getElementById('freqVal').textContent = Math.round(liveFreq);
+    document.getElementById('ampVal').textContent = Math.round(liveAmp);
+    document.getElementById('ampBar').style.width = liveAmp + '%';
+  } else {
+    document.getElementById('freqVal').textContent = '-';
+    document.getElementById('ampVal').textContent = '-';
+    document.getElementById('ampBar').style.width = '0%';
+    // Show hint text
+    ctx.fillStyle = '#B8B5C7';
+    ctx.font = "15px 'Jua', sans-serif";
+    ctx.textAlign = 'center';
+    ctx.fillText(mode === 'mic' ? '소리를 좀 더 크게 내주세요' : '', w/2, h/2 - 12);
+  }
+}
+
+function getGenColor(freq) {
+  if (freq === 200) return '#4F9CD8';
+  if (freq === 400) return '#5DBCA0';
+  if (freq === 800) return '#F27A5A';
+  return '#7C6BC7';
+}
+
+function drawStatic(msg) {
+  const { ctx, w, h } = fitCanvas(document.getElementById('liveCanvas'));
+  ctx.clearRect(0, 0, w, h);
+  drawGrid(ctx, w, h);
+  ctx.fillStyle = '#B8B5C7';
+  ctx.font = "15px 'Jua', sans-serif";
+  ctx.textAlign = 'center';
+  ctx.fillText(msg, w/2, h/2 - 12);
+  // Reset meters
+  document.getElementById('freqVal').textContent = '-';
+  document.getElementById('ampVal').textContent = '-';
+  document.getElementById('ampBar').style.width = '0%';
+}
+
+// ============================================================
+// Mode control
+// ============================================================
+function ensureAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function stopMic() {
+  if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+  if (micSource) { try { micSource.disconnect(); } catch(e){} micSource = null; }
+  if (analyser) { try { analyser.disconnect(); } catch(e){} analyser = null; }
+}
+
+function stopGen() {
+  if (osc) {
+    try {
+      const now = audioCtx.currentTime;
+      oscGain.gain.cancelScheduledValues(now);
+      oscGain.gain.setValueAtTime(oscGain.gain.value, now);
+      oscGain.gain.linearRampToValueAtTime(0, now + 0.03);
+      osc.stop(now + 0.05);
+    } catch(e){}
+    osc = null;
+  }
+  if (oscGain) { try { oscGain.disconnect(); } catch(e){} oscGain = null; }
+  currentGenFreq = 0;
+  document.querySelectorAll('.gen-btn').forEach(b => b.classList.remove('active'));
+}
+
+async function startMic() {
+  if (mode === 'mic') return;
+  stopGen();
+  stopMic();
+  try {
+    ensureAudioCtx();
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false
+      }
+    });
+    micSource = audioCtx.createMediaStreamSource(mediaStream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    analyser.smoothingTimeConstant = 0;
+    micSource.connect(analyser);
+    mode = 'mic';
+    const btn = document.getElementById('micBtn');
+    btn.textContent = '🔴 마이크 켜짐 (클릭하여 멈춤)';
+    btn.classList.add('active');
+    drawLive();
+  } catch(e) {
+    alert('마이크를 사용할 수 없습니다: ' + e.message);
+  }
+}
+
+function stopAll() {
+  stopGen();
+  stopMic();
+  mode = 'idle';
+  liveFreq = 0; liveAmp = 0;
+  const btn = document.getElementById('micBtn');
+  btn.textContent = '🎤 마이크 시작';
+  btn.classList.remove('active');
+  drawStatic('마이크를 켜거나 소리 생성기 버튼을 눌러보세요');
+}
+
+function startGen(freq) {
+  // Toggle same frequency = stop
+  if (mode === 'gen' && currentGenFreq === freq) {
+    stopAll();
+    return;
+  }
+  stopMic();
+  stopGen();
+  // Reset mic button state
+  const micBtn = document.getElementById('micBtn');
+  micBtn.textContent = '🎤 마이크 시작';
+  micBtn.classList.remove('active');
+
+  try {
+    ensureAudioCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    osc = audioCtx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    oscGain = audioCtx.createGain();
+    oscGain.gain.value = 0;
+    osc.connect(oscGain);
+    oscGain.connect(audioCtx.destination);
+    osc.start();
+    // Ramp up gain to avoid click
+    const now = audioCtx.currentTime;
+    oscGain.gain.linearRampToValueAtTime(GEN_GAIN, now + 0.03);
+
+    mode = 'gen';
+    currentGenFreq = freq;
+    liveFreq = freq;
+    liveAmp = GEN_AMP_PERCENT;
+
+    // Highlight active button
+    document.querySelectorAll('.gen-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.querySelector(`.gen-btn[data-freq="${freq}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    drawLive();
+  } catch(e) {
+    alert('소리 생성 오류: ' + e.message);
+  }
+}
+
+// ============================================================
+// A/B capture
+// ============================================================
+const captures = { A: null, B: null };
+
+function capture(slot) {
+  if (mode === 'idle' || liveFreq <= 0) {
+    // Give quick visual hint
+    const btn = document.getElementById('cap' + slot);
+    const orig = btn.style.background;
+    btn.style.background = '#B8B5C7';
+    setTimeout(() => { btn.style.background = orig; }, 300);
+    return;
+  }
+  captures[slot] = {
+    freq: liveFreq,
+    amp: liveAmp,
+    color: (mode === 'gen') ? getGenColor(currentGenFreq) : '#7C6BC7'
+  };
+  drawSlot(slot);
+}
+
+function drawSlot(slot) {
+  const c = document.getElementById('canvas' + slot);
+  const { ctx, w, h } = fitCanvas(c);
+  ctx.clearRect(0, 0, w, h);
+
+  // Center line
+  ctx.strokeStyle = '#E5E1E8';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
+
+  const cap = captures[slot];
+  if (!cap) {
+    ctx.fillStyle = '#B8B5C7';
+    ctx.font = "13px 'Jua', sans-serif";
+    ctx.textAlign = 'center';
+    ctx.fillText('저장된 파형 없음', w/2, h/2 - 6);
+    document.getElementById('freq' + slot).textContent = '-';
+    document.getElementById('amp' + slot).textContent = '-';
+    return;
+  }
+  drawSineWave(ctx, w, h, cap.freq, cap.amp, cap.color, 2.5);
+  document.getElementById('freq' + slot).textContent = Math.round(cap.freq) + ' Hz';
+  document.getElementById('amp' + slot).textContent = Math.round(cap.amp) + ' %';
+}
+
+// ============================================================
+// Screenshot
+// ============================================================
+async function captureScreen() {
+  const btn = document.getElementById('screenshotBtn');
+  const originalText = btn.textContent;
+  btn.textContent = '📸 캡처 중...';
+  btn.disabled = true;
+  try {
+    const root = document.getElementById('captureRoot');
+    const canvas = await html2canvas(root, {
+      backgroundColor: '#F7F5FB',
+      scale: 2,
+      logging: false,
+      useCORS: true
+    });
+    const link = document.createElement('a');
+    const now = new Date();
+    const stamp = now.getFullYear() + '' +
+                  String(now.getMonth()+1).padStart(2,'0') +
+                  String(now.getDate()).padStart(2,'0') + '_' +
+                  String(now.getHours()).padStart(2,'0') +
+                  String(now.getMinutes()).padStart(2,'0');
+    link.download = `잠신중_소리3요소_${stamp}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    // Flash feedback
+    root.classList.add('flashing');
+    setTimeout(() => root.classList.remove('flashing'), 500);
+  } catch(e) {
+    alert('캡처 오류: ' + e.message);
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
+
+// ============================================================
+// Event bindings
+// ============================================================
+document.getElementById('micBtn').addEventListener('click', () => {
+  if (mode === 'mic') stopAll();
+  else startMic();
+});
+document.querySelectorAll('.gen-btn[data-freq]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const freq = parseInt(btn.dataset.freq);
+    startGen(freq);
+  });
+});
+document.getElementById('genStop').addEventListener('click', () => {
+  if (mode === 'gen') stopAll();
+});
+document.getElementById('capA').addEventListener('click', () => capture('A'));
+document.getElementById('capB').addEventListener('click', () => capture('B'));
+document.getElementById('resetBtn').addEventListener('click', () => {
+  captures.A = null; captures.B = null;
+  drawSlot('A'); drawSlot('B');
+});
+document.getElementById('screenshotBtn').addEventListener('click', captureScreen);
+
+// ============================================================
+// Init
+// ============================================================
+window.addEventListener('load', () => {
+  drawStatic('마이크를 켜거나 소리 생성기 버튼을 눌러보세요');
+  drawSlot('A');
+  drawSlot('B');
+});
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (mode === 'idle') drawStatic('마이크를 켜거나 소리 생성기 버튼을 눌러보세요');
+    drawSlot('A');
+    drawSlot('B');
+  }, 100);
+});
+</script>
+</body>
+</html>
