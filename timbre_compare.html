@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>소리의 음색 비교기 | 잠신중 과학 실험실</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --mint: #5DBCA0;
+    --mint-dark: #3EA080;
+    --mint-soft: #EAFAF4;
+    --mint-line: #CDEFE2;
+    --amber: #E8A54A;
+    --amber-soft: #FDF5E7;
+    --ink: #2D3436;
+    --sub: #6E7275;
+    --paper: #FBFAF6;
+    --line: #E5E1D6;
+    --violin: #E96D5B;
+    --violin-soft: #FDF3F1;
+    --recorder: #4F9CD8;
+    --recorder-soft: #F1F7FD;
+    --voice: #7C6BC7;
+    --voice-soft: #F5F3FB;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.5;
+    padding: 20px 16px 60px;
+    min-height: 100vh;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 26px; }
+  .eyebrow {
+    display: inline-block;
+    font-family: 'Jua', sans-serif;
+    font-size: 18px;
+    color: var(--mint-dark);
+    background: var(--mint-soft);
+    border: 1px solid var(--mint-line);
+    padding: 6px 18px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-family: 'Jua', sans-serif;
+    font-size: 32px;
+    color: var(--ink);
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+  .subtitle { color: var(--sub); font-size: 15px; }
+
+  .panel {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+  .panel-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 20px;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+
+  canvas.live {
+    width: 100%;
+    height: 220px;
+    background: #FCFDFB;
+    border: 1px solid var(--mint-line);
+    border-radius: 12px;
+    display: block;
+  }
+
+  .meters {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin: 14px 0;
+    flex-wrap: wrap;
+  }
+  .meter {
+    font-family: 'Jua', sans-serif;
+    font-size: 16px;
+    background: var(--mint-soft);
+    color: var(--mint-dark);
+    padding: 8px 18px;
+    border-radius: 999px;
+    min-width: 130px;
+    text-align: center;
+  }
+  .meter b { color: var(--ink); margin-left: 4px; }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: 'Jua', sans-serif;
+    font-size: 15px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform 0.08s, box-shadow 0.15s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+  }
+  .btn:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.09); }
+  .btn:active { transform: scale(0.96); }
+  .btn-mint { background: var(--mint); color: white; }
+  .btn-amber { background: var(--amber); color: white; }
+  .btn-outline {
+    background: white; color: var(--ink);
+    border: 1.5px solid var(--line);
+    box-shadow: none;
+  }
+
+  .ab-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .slot {
+    background: #FCFCFA;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .slot h3 {
+    font-family: 'Jua', sans-serif;
+    font-size: 17px;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+  .slot .info {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--sub);
+  }
+  .slot .info b { color: var(--ink); }
+  canvas.slot-canvas {
+    width: 100%;
+    height: 130px;
+    background: white;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .refs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 6px;
+  }
+  .ref-card {
+    border: 2px solid transparent;
+    border-radius: 14px;
+    padding: 14px;
+    text-align: center;
+    transition: transform 0.15s;
+  }
+  .ref-card:hover { transform: translateY(-2px); }
+  .ref-card.violin   { background: var(--violin-soft);   border-color: rgba(233,109,91,0.25); }
+  .ref-card.recorder { background: var(--recorder-soft); border-color: rgba(79,156,216,0.25); }
+  .ref-card.voice    { background: var(--voice-soft);    border-color: rgba(124,107,199,0.25); }
+  .ref-emoji { font-size: 32px; margin-bottom: 2px; }
+  .ref-name {
+    font-family: 'Jua', sans-serif;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  canvas.ref-canvas {
+    width: 100%;
+    height: 110px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 8px;
+    display: block;
+    margin-bottom: 10px;
+  }
+  .ref-desc {
+    font-size: 13px;
+    color: var(--sub);
+    line-height: 1.5;
+    text-align: left;
+  }
+  .ref-desc b { color: var(--ink); }
+
+  .quiz {
+    background: linear-gradient(135deg, #FDF5E7 0%, #FFFAF0 100%);
+    border: 2px dashed var(--amber);
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    margin-top: 16px;
+  }
+  .quiz-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 17px;
+    color: #B57E22;
+    margin-bottom: 4px;
+  }
+  .quiz-q { font-size: 15px; color: var(--ink); }
+
+  .hint {
+    font-size: 13px;
+    color: var(--sub);
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .btn-shot { background: var(--mint-dark); color: white; }
+  .screenshot-controls {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  @keyframes flash {
+    0% { background: transparent; }
+    50% { background: rgba(255,255,150,0.4); }
+    100% { background: transparent; }
+  }
+  .flashing { animation: flash 0.5s; }
+
+  @media (max-width: 600px) {
+    body { padding: 14px 10px 40px; }
+    .refs { grid-template-columns: 1fr; }
+    .ab-compare { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; }
+    .panel { padding: 16px; }
+    .btn { font-size: 14px; padding: 9px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="container" id="captureRoot">
+
+<header>
+  <div class="eyebrow">🔬 즐거운 잠신중 과학 실험실</div>
+  <h1>소리의 음색 비교기</h1>
+</header>
+
+<!-- Live section -->
+<div class="panel">
+  <div class="panel-title">🎤 지금 들리는 소리의 파형</div>
+  <canvas class="live" id="liveCanvas"></canvas>
+  <div class="meters">
+    <div class="meter">진동수 <b id="freqVal">--</b></div>
+    <div class="meter">진폭 <b id="ampVal">--</b></div>
+  </div>
+  <div class="controls">
+    <button class="btn btn-mint" id="micBtn">🎤 마이크 시작</button>
+    <button class="btn btn-amber" id="capA">📸 A로 저장</button>
+    <button class="btn btn-amber" id="capB">📸 B로 저장</button>
+    <button class="btn btn-outline" id="resetBtn">🔄 초기화</button>
+  </div>
+  <div class="hint">💡 바이올린, 리코더, "아~" 소리 등을 각각 A와 B에 저장해서 비교해보세요</div>
+</div>
+
+<!-- AB Comparison -->
+<div class="panel">
+  <div class="panel-title">🔍 A와 B의 파형 비교</div>
+  <div class="ab-compare">
+    <div class="slot">
+      <h3>A 파형</h3>
+      <canvas class="slot-canvas" id="canvasA"></canvas>
+      <div class="info"><span>진동수: <b id="freqA">-</b></span> <span>진폭: <b id="ampA">-</b></span></div>
+    </div>
+    <div class="slot">
+      <h3>B 파형</h3>
+      <canvas class="slot-canvas" id="canvasB"></canvas>
+      <div class="info"><span>진동수: <b id="freqB">-</b></span> <span>진폭: <b id="ampB">-</b></span></div>
+    </div>
+  </div>
+  <div class="quiz">
+    <div class="quiz-title">🤔 관찰하고 생각해봐요</div>
+    <div class="quiz-q">A와 B는 어떤 차이가 있나요?</div>
+  </div>
+</div>
+
+<!-- Screenshot button -->
+<div class="screenshot-controls">
+  <button class="btn btn-shot" id="screenshotBtn">📷 화면 전체 캡처하기</button>
+</div>
+
+</div>
+
+<script>
+"use strict";
+
+function fitCanvas(c) {
+  const dpr = window.devicePixelRatio || 1;
+  const w = c.clientWidth, h = c.clientHeight;
+  c.width = w * dpr; c.height = h * dpr;
+  const ctx = c.getContext('2d');
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(dpr, dpr);
+  return { ctx, w, h };
+}
+
+// ============================================================
+// 실시간 마이크 파형
+// ============================================================
+const liveCanvas = document.getElementById('liveCanvas');
+let audioCtx = null, analyser = null, mediaStream = null, source = null;
+let running = false;
+let liveFreq = 0, liveAmp = 0;
+let latestBuffer = null;
+
+// ---- 자동 상관법 기반 진동수 검출 ----
+function detectPitch(buf, sampleRate){
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i=0;i<SIZE;i++) rms += buf[i]*buf[i];
+  rms = Math.sqrt(rms/SIZE);
+  if (rms < 0.006) return -1;
+
+  // trim leading/trailing quiet region
+  const thresh = 0.15;
+  let r1=0, r2=SIZE-1;
+  for (let i=0;i<SIZE/2;i++) if (Math.abs(buf[i])<thresh){ r1=i; break; }
+  for (let i=1;i<SIZE/2;i++) if (Math.abs(buf[SIZE-i])<thresh){ r2=SIZE-i; break; }
+  const trimmed = buf.subarray(r1, r2);
+  const N = trimmed.length;
+  if (N < 32) return -1;
+
+  const c = new Float32Array(N);
+  for (let i=0;i<N;i++){
+    let s = 0;
+    for (let j=0;j<N-i;j++) s += trimmed[j]*trimmed[j+i];
+    c[i] = s;
+  }
+  let d=0; while (d<N-1 && c[d]>c[d+1]) d++;
+  let maxval=-Infinity, maxpos=-1;
+  for (let i=d;i<N;i++){ if (c[i]>maxval){ maxval=c[i]; maxpos=i; } }
+  if (maxpos<=0) return -1;
+  // parabolic interpolation
+  const x1=c[maxpos-1]||0, x2=c[maxpos], x3=c[maxpos+1]||0;
+  const a=(x1+x3-2*x2)/2, b=(x3-x1)/2;
+  let T0 = maxpos;
+  if (a) T0 = maxpos - b/(2*a);
+  return sampleRate / T0;
+}
+
+// ---- 여러 주기 겹쳐 평균 → 매끈한 한 주기 → 2.5주기 반복 ----
+function buildCleanWaveform(buf, freq, sampleRate){
+  const periodF = sampleRate / freq;
+  const period  = Math.max(8, Math.round(periodF));
+  if (period < 4 || period > buf.length/2) return null;
+
+  // find first positive-going zero crossing
+  let start = 0;
+  for (let i=2; i < buf.length - period*3 - 2; i++){
+    if (buf[i-1] <= 0 && buf[i] > 0){ start = i; break; }
+  }
+  // average up to 4 cycles
+  const cyclesAvailable = Math.floor((buf.length - start) / period);
+  const cyclesToAvg = Math.min(4, Math.max(1, cyclesAvailable));
+  const single = new Float32Array(period);
+  for (let c=0; c<cyclesToAvg; c++){
+    const off = start + c*period;
+    for (let i=0; i<period; i++) single[i] += buf[off + i];
+  }
+  for (let i=0; i<period; i++) single[i] /= cyclesToAvg;
+
+  // small smoothing (moving average, width 3)
+  const smoothed = new Float32Array(period);
+  for (let i=0;i<period;i++){
+    const a = single[(i-1+period)%period];
+    const b = single[i];
+    const c = single[(i+1)%period];
+    smoothed[i] = (a + 2*b + c) / 4;
+  }
+  // repeat 2.5x for display
+  const displayLen = Math.round(period * 2.5);
+  const out = new Float32Array(displayLen);
+  for (let i=0;i<displayLen;i++) out[i] = smoothed[i % period];
+  return out;
+}
+
+function drawStatic(c, msg){
+  const { ctx, w, h } = fitCanvas(c);
+  ctx.clearRect(0,0,w,h);
+  // grid
+  ctx.strokeStyle = '#EEF2EE';
+  ctx.lineWidth = 1;
+  for (let i=1;i<8;i++){
+    const x = w*i/8;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke();
+  }
+  ctx.strokeStyle = '#CDEFE2';
+  ctx.beginPath(); ctx.moveTo(0,h/2); ctx.lineTo(w,h/2); ctx.stroke();
+  ctx.fillStyle = '#BBB';
+  ctx.font = "16px 'Jua', sans-serif";
+  ctx.textAlign = 'center';
+  ctx.fillText(msg, w/2, h/2 - 12);
+}
+
+function drawLive(){
+  if (!running) return;
+  requestAnimationFrame(drawLive);
+  const buf = new Float32Array(analyser.fftSize);
+  analyser.getFloatTimeDomainData(buf);
+  latestBuffer = buf;
+
+  // RMS → amp %
+  let sum = 0;
+  for (let i=0;i<buf.length;i++) sum += buf[i]*buf[i];
+  const rms = Math.sqrt(sum/buf.length);
+  liveAmp = Math.min(100, Math.sqrt(rms) * 230);
+
+  const f = detectPitch(buf, audioCtx.sampleRate);
+  if (f > 60 && f < 2000) liveFreq = f;
+
+  const { ctx, w, h } = fitCanvas(liveCanvas);
+  ctx.clearRect(0,0,w,h);
+  // grid
+  ctx.strokeStyle = '#EEF2EE';
+  ctx.lineWidth = 1;
+  for (let i=1;i<8;i++){
+    const x = w*i/8;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke();
+  }
+  ctx.strokeStyle = '#CDEFE2';
+  ctx.beginPath(); ctx.moveTo(0,h/2); ctx.lineTo(w,h/2); ctx.stroke();
+
+  if (rms > 0.006 && liveFreq > 0){
+    const clean = buildCleanWaveform(buf, liveFreq, audioCtx.sampleRate);
+    if (clean){
+      let maxAbs = 0.0001;
+      for (let i=0;i<clean.length;i++) if (Math.abs(clean[i])>maxAbs) maxAbs = Math.abs(clean[i]);
+      const displayGain = Math.max(0.18, Math.min(1, Math.sqrt(rms)*3.8));
+      ctx.strokeStyle = '#5DBCA0';
+      ctx.lineWidth = 3;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let i=0;i<clean.length;i++){
+        const x = i/(clean.length-1) * w;
+        const y = h/2 - (clean[i]/maxAbs) * displayGain * (h/2 - 14);
+        if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+    document.getElementById('freqVal').textContent = liveFreq.toFixed(0) + ' Hz';
+    document.getElementById('ampVal').textContent  = liveAmp.toFixed(0) + ' %';
+  } else {
+    document.getElementById('freqVal').textContent = '--';
+    document.getElementById('ampVal').textContent  = '--';
+    ctx.fillStyle = '#BBB';
+    ctx.font = "15px 'Jua', sans-serif";
+    ctx.textAlign = 'center';
+    ctx.fillText('소리가 너무 작아요 - 좀 더 크게 내주세요', w/2, h/2 - 12);
+  }
+}
+
+// ---- A/B 캡처 ----
+const captures = { A: null, B: null };
+const SLOT_COLORS = { A: '#E8A54A', B: '#5DBCA0' };
+
+function capture(slot){
+  if (!running || liveFreq <= 0 || !latestBuffer) return;
+  const clean = buildCleanWaveform(latestBuffer, liveFreq, audioCtx.sampleRate);
+  if (!clean) return;
+  captures[slot] = { wave: new Float32Array(clean), freq: liveFreq, amp: liveAmp };
+  drawSlot(slot);
+  // flash feedback
+  const btn = document.getElementById('cap' + slot);
+  btn.style.background = '#3EA080';
+  setTimeout(()=>{ btn.style.background = ''; }, 250);
+}
+
+function drawSlot(slot){
+  const c = document.getElementById('canvas' + slot);
+  const { ctx, w, h } = fitCanvas(c);
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle = '#E5E1D6';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0,h/2); ctx.lineTo(w,h/2); ctx.stroke();
+
+  const cap = captures[slot];
+  if (!cap){
+    ctx.fillStyle = '#BBB';
+    ctx.font = "13px 'Jua', sans-serif";
+    ctx.textAlign = 'center';
+    ctx.fillText('저장된 파형 없음', w/2, h/2 - 6);
+    document.getElementById('freq'+slot).textContent = '-';
+    document.getElementById('amp'+slot).textContent  = '-';
+    return;
+  }
+  const wave = cap.wave;
+  let maxAbs = 0.0001;
+  for (let i=0;i<wave.length;i++) if (Math.abs(wave[i])>maxAbs) maxAbs = Math.abs(wave[i]);
+  const displayGain = Math.max(0.2, Math.min(1, Math.sqrt(cap.amp/100) * 1.6));
+
+  ctx.strokeStyle = SLOT_COLORS[slot];
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (let i=0;i<wave.length;i++){
+    const x = i/(wave.length-1) * w;
+    const y = h/2 - (wave[i]/maxAbs) * displayGain * (h/2 - 10);
+    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  document.getElementById('freq'+slot).textContent = cap.freq.toFixed(0) + ' Hz';
+  document.getElementById('amp'+slot).textContent  = cap.amp.toFixed(0) + ' %';
+}
+
+// ---- 마이크 시작 ----
+async function startMic(){
+  if (running) return;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false
+      }
+    });
+    source = audioCtx.createMediaStreamSource(mediaStream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    analyser.smoothingTimeConstant = 0;
+    source.connect(analyser);
+    running = true;
+    const btn = document.getElementById('micBtn');
+    btn.textContent = '🔴 마이크 켜짐';
+    btn.style.background = '#3EA080';
+    drawLive();
+  } catch(e){
+    alert('마이크를 사용할 수 없습니다: ' + e.message);
+  }
+}
+
+// ---- 이벤트 ----
+document.getElementById('micBtn').addEventListener('click', startMic);
+document.getElementById('capA').addEventListener('click', ()=>capture('A'));
+document.getElementById('capB').addEventListener('click', ()=>capture('B'));
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  captures.A = null; captures.B = null;
+  drawSlot('A'); drawSlot('B');
+});
+
+// ---- 화면 캡처 ----
+async function captureScreen() {
+  const btn = document.getElementById('screenshotBtn');
+  const originalText = btn.textContent;
+  btn.textContent = '📸 캡처 중...';
+  btn.disabled = true;
+  try {
+    const root = document.getElementById('captureRoot');
+    const canvas = await html2canvas(root, {
+      backgroundColor: '#FBFAF6',
+      scale: 2,
+      logging: false,
+      useCORS: true
+    });
+    const link = document.createElement('a');
+    const now = new Date();
+    const stamp = now.getFullYear() + '' +
+                  String(now.getMonth()+1).padStart(2,'0') +
+                  String(now.getDate()).padStart(2,'0') + '_' +
+                  String(now.getHours()).padStart(2,'0') +
+                  String(now.getMinutes()).padStart(2,'0');
+    link.download = `잠신중_음색비교_${stamp}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    root.classList.add('flashing');
+    setTimeout(() => root.classList.remove('flashing'), 500);
+  } catch(e) {
+    alert('캡처 오류: ' + e.message);
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
+document.getElementById('screenshotBtn').addEventListener('click', captureScreen);
+
+// ---- 초기화 ----
+window.addEventListener('load', ()=>{
+  drawStatic(liveCanvas, '마이크를 켜고 소리를 내보세요');
+  drawSlot('A');
+  drawSlot('B');
+});
+
+let resizeTimer;
+window.addEventListener('resize', ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=>{
+    if (!running) drawStatic(liveCanvas, '마이크를 켜고 소리를 내보세요');
+    drawSlot('A');
+    drawSlot('B');
+  }, 100);
+});
+</script>
+</body>
+</html>
